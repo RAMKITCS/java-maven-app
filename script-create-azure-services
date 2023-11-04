@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# Variables
+RESOURCE_GROUP="azuredevops"
+LOCATION="eastus"
+AKS_CLUSTER_NAME="MyAKSCluster"
+ACR_NAME="MyACRRegistryazdevops"
+NAMESPACE="helm-deploy"
+SERVICE_PRINCIPAL_NAME="MyAKSServicePrincipal"
+
+# Create Resource Group
+echo "Creating resource group..."
+az group create --name $RESOURCE_GROUP --location $LOCATION
+
+# Create AKS Cluster
+echo "Creating AKS cluster..."
+az aks create \
+    --resource-group $RESOURCE_GROUP \
+    --name $AKS_CLUSTER_NAME \
+    --node-count 3 \
+    --generate-ssh-keys \
+    --attach-acr $ACR_NAME
+
+# Get the id of the service principal configured for AKS
+echo "Retrieving service principal ID..."
+SERVICE_PRINCIPAL_ID=$(az aks show \
+    --resource-group $RESOURCE_GROUP \
+    --name $AKS_CLUSTER_NAME \
+    --query "servicePrincipalProfile.clientId" -o tsv)
+
+# Create ACR
+echo "Creating ACR..."
+az acr create \
+    --resource-group $RESOURCE_GROUP \
+    --name $ACR_NAME \
+    --sku Basic
+
+# Grant AKS-generated service principal pull access to ACR
+echo "Granting AKS pull access from ACR..."
+az role assignment create \
+    --assignee $SERVICE_PRINCIPAL_ID \
+    --role acrpull \
+    --scope $(az acr show --name $ACR_NAME --query id --output tsv)
+
+# Connect to AKS cluster
+echo "Connecting to AKS cluster..."
+az aks get-credentials --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME
+
+# Create namespace in AKS for Helm deployment
+echo "Creating namespace for Helm deployment..."
+kubectl create namespace $NAMESPACE
+
+echo "Setup completed successfully."
