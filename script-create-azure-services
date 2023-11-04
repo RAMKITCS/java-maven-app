@@ -4,9 +4,9 @@
 RESOURCE_GROUP="azuredevops"
 LOCATION="eastus"
 AKS_CLUSTER_NAME="MyAKSCluster"
-ACR_NAME="MyACRRegistryazdevops"
+ACR_NAME="myacrregistryazdevops"
 NAMESPACE="helm-deploy"
-SERVICE_PRINCIPAL_NAME="MyAKSServicePrincipal"
+SERVICE_PRINCIPAL_NAME="myaksserviceprincipal"
 
 # Create Resource Group
 echo "Creating resource group..."
