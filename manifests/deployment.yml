@@ -1,0 +1,19 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: ramkitcsjavamavenapp 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ramkitcsjavamavenapp
+  template:
+    metadata:
+      labels:
+        app: ramkitcsjavamavenapp 
+    spec:
+      containers:
+        - name: ramkitcsjavamavenapp 
+          image: myacrregistryazdevops.azurecr.io/ramkitcsjavamavenapp
+          ports:
+          - containerPort: 80
